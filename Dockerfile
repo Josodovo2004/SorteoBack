@@ -19,4 +19,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Command to run the Django app
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "SorteoBack.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "SistemaRV.wsgi:application"]
