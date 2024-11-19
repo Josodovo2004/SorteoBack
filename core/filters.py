@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 import django_filters
-from .models import Sorteo, Ticket, Objeto
+from .models import Sorteo, Ticket, Premio, PremioSorteo
 
 
 class UserFilter(django_filters.FilterSet):
@@ -16,27 +16,42 @@ class UserFilter(django_filters.FilterSet):
 
 
 class SorteoFilter(django_filters.FilterSet):
-    usuario__user__username = django_filters.CharFilter(lookup_expr='icontains')
-    limiteTickets = django_filters.NumberFilter()
+    nombre = django_filters.CharFilter(lookup_expr='icontains')
+    usuario = django_filters.ModelChoiceFilter(queryset=User.objects.all())
+    precioTickets_min = django_filters.NumberFilter(field_name="precioTickets", lookup_expr='gte')
+    precioTickets_max = django_filters.NumberFilter(field_name="precioTickets", lookup_expr='lte')
+    fechaSorteo = django_filters.DateFromToRangeFilter()
 
     class Meta:
         model = Sorteo
-        fields = ['usuario__user__username', 'limiteTickets']
+        fields = ['nombre', 'nombrePublico', 'usuario', 'precioTickets', 'fechaSorteo']
 
 
 class TicketFilter(django_filters.FilterSet):
-    sorteo__id = django_filters.NumberFilter(field_name='sorteo__id')
-    usuario__user__username = django_filters.CharFilter(lookup_expr='icontains')
-    precio = django_filters.RangeFilter()  # Allows filtering by price range (e.g., min and max)
+    sorteo = django_filters.ModelChoiceFilter(queryset=Sorteo.objects.all())
+    nombreComprador = django_filters.CharFilter(lookup_expr='icontains')
+    correo = django_filters.CharFilter(lookup_expr='icontains')
+    estado = django_filters.BooleanFilter()
+    fechaVenta = django_filters.DateFromToRangeFilter()
 
     class Meta:
         model = Ticket
-        fields = ['sorteo__id', 'usuario__user__username', 'precio']
+        fields = ['sorteo', 'ganador', 'nombreComprador', 'correo', 'estado', 'fechaVenta']
 
 
-class ObjetoFilter(django_filters.FilterSet):
+class PremioFilter(django_filters.FilterSet):
     nombre = django_filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
-        model = Objeto
+        model = Premio
         fields = ['nombre']
+
+
+
+class PremioSorteoFilter(django_filters.FilterSet):
+    objecto = django_filters.ModelChoiceFilter(queryset=Premio.objects.all())
+    sorteo = django_filters.ModelChoiceFilter(queryset=Sorteo.objects.all())
+
+    class Meta:
+        model = PremioSorteo
+        fields = ['objecto', 'sorteo']

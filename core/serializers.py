@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from core.models import  Sorteo, Objeto, Ticket
+from core.models import  Sorteo, Premio, Ticket, PremioSorteo
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -84,9 +84,9 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ObjetoSerializer(serializers.ModelSerializer):
+class PremioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Objeto
+        model = Premio
         fields = '__all__'
 
 
@@ -95,3 +95,9 @@ class CustomTicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = '__all__' 
         depth = 2  
+        
+class PremioSorteoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PremioSorteo
+        fields = '__all__'  # Includes all fields in the model

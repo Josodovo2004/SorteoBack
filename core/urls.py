@@ -2,9 +2,10 @@ from django.urls import path
 from .views import (RegisterView, LoginView, 
                    UserListView, UserRetrieveView,
                    SorteoListView, SorteoDetailView,
-                   ObjetoListView, ObjetoDetailView,
+                   PremioListView, PremioDetailView,
                    TicketListView, TicketDetailView,
                    SorteoView,
+                   PremioSorteoDetailView, PremioSorteoListCreateView
                    )
 urlpatterns = [
         path('register/', RegisterView.as_view(), name='register'),
@@ -15,11 +16,14 @@ urlpatterns = [
     path('sorteos/', SorteoListView.as_view(), name='sorteo-list-create'),
     path('sorteos/<int:pk>/', SorteoDetailView.as_view(), name='sorteo-detail'),
 
-    path('objetos/', ObjetoListView.as_view(), name='objetos-list-create'),
-    path('objetos/<int:pk>/', ObjetoDetailView.as_view(), name='objetos-detail'),
+    path('premios/', PremioListView.as_view(), name='premios-list-create'),
+    path('premios/<int:pk>/', PremioDetailView.as_view(), name='premios-detail'),
 
     path('tickets/', TicketListView.as_view(), name='tickets-list-create'),
     path('tickets/<int:pk>/', TicketDetailView.as_view(), name='tickets-detail'),
+    
+    path('premio-sorteo/', PremioSorteoListCreateView.as_view(), name='premio-sorteo-list-create'),
+    path('premio-sorteo/<int:pk>/', PremioSorteoDetailView.as_view(), name='premio-sorteo-detail'),
 
     path('hacer-sorteo/', SorteoView.as_view(), name='hacer-sorteo'),
 ]

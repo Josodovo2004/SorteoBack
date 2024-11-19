@@ -22,11 +22,11 @@ class Ticket(models.Model):
     estado = models.BooleanField(default=False)
     fechaVenta = models.DateTimeField(null=True)
     
-class Objeto(models.Model):
+class Premio(models.Model):
     nombre = models.CharField(max_length=200, null=True)
     descripcion = models.TextField(max_length=500, null=True)
     imagen = models.CharField(max_length=500, null=True)
     
-class Premio(models.Model):
-    objecto = models.ForeignKey(Objeto, on_delete=models.CASCADE)
+class PremioSorteo(models.Model):
+    objecto = models.ForeignKey(Premio, on_delete=models.CASCADE)
     sorteo = models.ForeignKey(Sorteo, on_delete=models.CASCADE)

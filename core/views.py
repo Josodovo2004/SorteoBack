@@ -2,16 +2,16 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, PremioSorteoSerializer
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import permissions
-from core.models import Sorteo, Ticket, Objeto
-from .filters import UserFilter, TicketFilter, SorteoFilter, ObjetoFilter
-from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, SorteoSerializer, ObjetoSerializer, TicketSerializer, CustomTicketSerializer
+from core.models import Sorteo, Ticket, Premio, PremioSorteo
+from .filters import UserFilter, TicketFilter, SorteoFilter, PremioFilter
+from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, SorteoSerializer, PremioSerializer, TicketSerializer, CustomTicketSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 from rest_framework.permissions import IsAuthenticated
@@ -149,7 +149,6 @@ class TicketListView(generics.ListCreateAPIView):
     serializer_class = TicketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TicketFilter
-    permission_classes = [IsAuthenticated]  # Require authentication
 
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -159,18 +158,26 @@ class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-class ObjetoListView(generics.ListCreateAPIView):
-    queryset = Objeto.objects.all()
-    serializer_class = ObjetoSerializer
+class PremioListView(generics.ListCreateAPIView):
+    queryset = Premio.objects.all()
+    serializer_class = PremioSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_class = ObjetoFilter
+    filterset_class = PremioFilter
     permission_classes = [IsAuthenticated]  # Require authentication
 
 
-class ObjetoDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Objeto.objects.all()
-    serializer_class = ObjetoSerializer
+class PremioDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Premio.objects.all()
+    serializer_class = PremioSerializer
     permission_classes = [IsAuthenticated]  # Require authentication
+    
+class PremioSorteoListCreateView(generics.ListCreateAPIView):
+    queryset = PremioSorteo.objects.all()
+    serializer_class = PremioSorteoSerializer
+    
+class PremioSorteoDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = PremioSorteo.objects.all()
+    serializer_class = PremioSorteoSerializer
 
 
 class SorteoView(APIView):
