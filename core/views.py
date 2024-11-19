@@ -94,7 +94,6 @@ class UserRetrieveView(RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     
     
-    
 class CustomTokenObtainPairView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
 
