@@ -134,7 +134,6 @@ class SorteoListView(generics.ListCreateAPIView):
     serializer_class = SorteoSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = SorteoFilter
-    permission_classes = [IsAuthenticated]  # Require authentication
 
 
 class SorteoDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -163,7 +162,6 @@ class PremioListView(generics.ListCreateAPIView):
     serializer_class = PremioSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PremioFilter
-    permission_classes = [IsAuthenticated]  # Require authentication
 
 
 class PremioDetailView(generics.RetrieveUpdateDestroyAPIView):
