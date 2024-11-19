@@ -69,15 +69,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']  # Include other fields as needed
 
 class SorteoSerializer(serializers.ModelSerializer):
-    usuario = UserSerializer()
 
     class Meta:
         model = Sorteo
-        fields = ['id', 'limiteTickets', 'usuario']
+        fields = '__all__'
 
 
 class TicketSerializer(serializers.ModelSerializer):
-    sorteo = SorteoSerializer()
 
     class Meta:
         model = Ticket
