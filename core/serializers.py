@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from core.models import UserProfile, Sorteo, Objeto, Ticket
+from core.models import  Sorteo, Objeto, Ticket
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -14,11 +14,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
-    celular = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'password2', 'email', 'first_name', 'last_name', 'celular')
+        fields = ('username', 'password', 'password2', 'email', 'first_name', 'last_name')
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -37,9 +36,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
-
-        # Create UserProfile instance if it doesn't already exist
-        UserProfile.objects.get_or_create(user=user, defaults={'celular': celular})
 
         return user  # Return the created user instance
 
@@ -62,27 +58,18 @@ class LoginSerializer(serializers.Serializer):
         refresh = RefreshToken.for_user(user)
         attrs['refresh'] = str(refresh)
         attrs['access'] = str(refresh.access_token)
-        profile: UserProfile = UserProfile.objects.filter(user=user).first()
-        attrs['celular'] = profile.celular  
 
         return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):
-    celular = serializers.CharField(source='userprofile.celular', read_only=True)  
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'celular']  # Include other fields as needed
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = '__all__'  # or specify fields if you prefer
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']  # Include other fields as needed
 
 class SorteoSerializer(serializers.ModelSerializer):
-    usuario = UserProfileSerializer()
+    usuario = UserSerializer()
 
     class Meta:
         model = Sorteo
@@ -91,17 +78,16 @@ class SorteoSerializer(serializers.ModelSerializer):
 
 class TicketSerializer(serializers.ModelSerializer):
     sorteo = SorteoSerializer()
-    usuario = UserProfileSerializer()
 
     class Meta:
         model = Ticket
-        fields = ['id', 'sorteo', 'usuario', 'precio']
+        fields = '__all__'
 
 
 class ObjetoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Objeto
-        fields = ['id', 'nombre', 'imagen']
+        fields = '__all__'
 
 
 class CustomTicketSerializer(serializers.ModelSerializer):

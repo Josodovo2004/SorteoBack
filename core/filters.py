@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 import django_filters
-from .models import UserProfile, Sorteo, Ticket, Objeto
+from .models import Sorteo, Ticket, Objeto
 
 
 class UserFilter(django_filters.FilterSet):
@@ -13,13 +13,6 @@ class UserFilter(django_filters.FilterSet):
         fields = ['username', 'email', 'is_active']
 
 
-class UserProfileFilter(django_filters.FilterSet):
-    user__username = django_filters.CharFilter(lookup_expr='icontains')
-    celular = django_filters.CharFilter(lookup_expr='icontains')
-
-    class Meta:
-        model = UserProfile
-        fields = ['user__username', 'celular']
 
 
 class SorteoFilter(django_filters.FilterSet):

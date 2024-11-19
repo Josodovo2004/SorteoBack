@@ -9,9 +9,9 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import permissions
-from core.models import UserProfile, Sorteo, Ticket, Objeto
-from .filters import *
-from .serializers import *
+from core.models import Sorteo, Ticket, Objeto
+from .filters import UserFilter, TicketFilter, SorteoFilter, ObjetoFilter
+from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, SorteoSerializer, ObjetoSerializer, TicketSerializer, CustomTicketSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 from rest_framework.permissions import IsAuthenticated
