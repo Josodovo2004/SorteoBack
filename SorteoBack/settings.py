@@ -84,9 +84,9 @@ WSGI_APPLICATION = 'SorteoBack.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": 'django.db.backends.postgresql',
-        "NAME": 'SorteoDB',
+        "NAME": 'SorteoBack',
         "USER": 'postgres',
-        "PASSWORD": 'Jose_d@vid2004',
+        "PASSWORD": '1234',
         "HOST": 'db',
         "PORT": '5432',
     }
