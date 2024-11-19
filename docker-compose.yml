@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: SorteoBack
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - SorteoBack_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+
+  web:
+    build:
+      context: .
+      labels:
+        - "project=SorteoBack"
+    command: bash -c "python manage.py migrate && 
+             python manage.py import_data_from_csv &&
+             gunicorn --bind 0.0.0.0:8000 SorteoBack.wsgi:application"
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://postgres:1234@db/SorteoBack
+    networks:
+      - app_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+
+volumes:
+  SorteoBack_postgres_data:
+
+networks:
+  app_network:
