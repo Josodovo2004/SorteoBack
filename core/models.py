@@ -11,6 +11,7 @@ class Sorteo(models.Model):
     descripcion = models.TextField(max_length=500, null=True)
     imagen = models.CharField(max_length=500, null=True)
     precioTickets = models.FloatField(null=True)
+    fechaSorteo = models.DateTimeField(null=True)
 
 class Ticket(models.Model):
     sorteo = models.ForeignKey(Sorteo, on_delete=models.CASCADE)
@@ -19,7 +20,13 @@ class Ticket(models.Model):
     correo = models.CharField(max_length=250, null=True)
     celular = models.CharField(max_length=15, null=True)
     estado = models.BooleanField(default=False)
+    fechaVenta = models.DateTimeField(null=True)
+    
 class Objeto(models.Model):
     nombre = models.CharField(max_length=200, null=True)
     descripcion = models.TextField(max_length=500, null=True)
     imagen = models.CharField(max_length=500, null=True)
+    
+class Premio(models.Model):
+    objecto = models.ForeignKey(Objeto, on_delete=models.CASCADE)
+    sorteo = models.ForeignKey(Sorteo, on_delete=models.CASCADE)
