@@ -21,6 +21,7 @@ class Ticket(models.Model):
     celular = models.CharField(max_length=15, null=True)
     estado = models.BooleanField(default=False)
     fechaVenta = models.DateTimeField(null=True)
+    totalPagado = models.FloatField(default=0.00)
     
 class Premio(models.Model):
     nombre = models.CharField(max_length=200, null=True)
