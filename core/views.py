@@ -59,10 +59,13 @@ class LoginView(generics.GenericAPIView):
         # Generate tokens using the CustomTokenObtainPairView logic
         refresh = RefreshToken.for_user(user)
         access = str(refresh.access_token)
+        serializedUser = UserSerializer(user).data
 
         # Set the refresh token in a secure cookie
         response = Response({
             'access': access,
+            'user_id': serializedUser['id'],
+            'username': serializedUser['username'],
         }, status=status.HTTP_200_OK)
 
         # Set the refresh token in an HttpOnly, Secure cookie
