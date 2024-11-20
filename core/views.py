@@ -60,14 +60,9 @@ class LoginView(generics.GenericAPIView):
         refresh = RefreshToken.for_user(user)
         access = str(refresh.access_token)
 
-         # Get the RUC from the UserProfile
-        profile = UserProfile.objects.filter(user=user).first()
-        ruc = profile.ruc if profile else None
-
         # Set the refresh token in a secure cookie
         response = Response({
             'access': access,
-            'ruc': ruc,  # Include RUC in the response
         }, status=status.HTTP_200_OK)
 
         # Set the refresh token in an HttpOnly, Secure cookie
