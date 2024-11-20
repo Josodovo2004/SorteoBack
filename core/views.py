@@ -251,7 +251,8 @@ class SorteoView(APIView):
 
         # Shuffle tickets to pick a winner
         random.shuffle(lista_tickets)
-        ganador = lista_tickets[0]
+        winnerNumber = random.randint(0, len(lista_tickets))
+        ganador = lista_tickets[winnerNumber]
 
         # Mark the winning ticket
         ganador.ganador = True
