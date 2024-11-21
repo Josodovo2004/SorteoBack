@@ -30,4 +30,6 @@ urlpatterns = [
     path('premio-sorteo/<int:pk>/', PremioSorteoDetailView.as_view(), name='premio-sorteo-detail'),
 
     path('hacer-sorteo/', SorteoView.as_view(), name='hacer-sorteo'),
+
+    path('tickets-pagados/', GetTicketPagados.as_view(), name='tickets-pagados'),
 ]
