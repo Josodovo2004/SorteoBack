@@ -268,6 +268,34 @@ class SorteoView(APIView):
 
 class GetTicketPagados(APIView):
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get Paid Tickets",
+        operation_description="Returns the count of paid tickets (`estado=True`) for a given Sorteo identified by `id_sorteo`.",
+        manual_parameters=[
+            openapi.Parameter(
+                name="id_sorteo",
+                in_=openapi.IN_QUERY,
+                description="The ID of the Sorteo to retrieve paid tickets for.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="Successful response with the count of paid tickets.",
+                examples={"application/json": {"tickets_pagados": 5}},
+            ),
+            400: openapi.Response(
+                description="Bad Request - Missing or invalid `id_sorteo`.",
+                examples={"application/json": {"error": "The 'id_sorteo' parameter must be an integer."}},
+            ),
+            404: openapi.Response(
+                description="Not Found - Sorteo or tickets not found.",
+                examples={"application/json": {"error": "Sorteo with id 123 not found."}},
+            ),
+        },
+    )
     def get(self, request):
         id_sorteo = request.query_params.get('id_sorteo')
         if not id_sorteo:
