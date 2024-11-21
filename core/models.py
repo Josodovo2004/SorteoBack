@@ -29,5 +29,5 @@ class Premio(models.Model):
     imagen = models.CharField(max_length=500, null=True)
     
 class PremioSorteo(models.Model):
-    objecto = models.ForeignKey(Premio, on_delete=models.CASCADE)
+    premio = models.ForeignKey(Premio, on_delete=models.CASCADE)
     sorteo = models.ForeignKey(Sorteo, on_delete=models.CASCADE)

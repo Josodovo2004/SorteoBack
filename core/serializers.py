@@ -98,4 +98,5 @@ class PremioSorteoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PremioSorteo
-        fields = '__all__'  # Includes all fields in the model
+        fields = '__all__'  
+        depth = 2

@@ -49,9 +49,9 @@ class PremioFilter(django_filters.FilterSet):
 
 
 class PremioSorteoFilter(django_filters.FilterSet):
-    objecto = django_filters.ModelChoiceFilter(queryset=Premio.objects.all())
+    premio = django_filters.ModelChoiceFilter(queryset=Premio.objects.all())
     sorteo = django_filters.ModelChoiceFilter(queryset=Sorteo.objects.all())
 
     class Meta:
         model = PremioSorteo
-        fields = ['objecto', 'sorteo']
+        fields = ['premio', 'sorteo']
