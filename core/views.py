@@ -333,4 +333,4 @@ class GetTicketPagados(APIView):
             if ticket.estado == True:
                 ticektsPagados += 1
         
-        return Response({'tickets_pagados': ticektsPagados})
+        return Response({'tickets_pagados': ticektsPagados}, status=status.HTTP_200_OK)
