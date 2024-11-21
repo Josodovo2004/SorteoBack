@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import permissions
 from core.models import Raffle, Ticket, Prize, PrizeRaffle
 from .filters import UserFilter, TicketFilter, RaffleFilter, PrizeFilter, PrizeRaffleFilter
-from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, RaffleSerializer, PrizeSerializer, TicketSerializer, CustomTicketSerializer
+from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, RaffleSerializer, PrizeSerializer, TicketSerializer, CustomTicketSerializer, CustomPrizeRaffleSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 from rest_framework.permissions import IsAuthenticated
@@ -152,12 +152,15 @@ class PrizeDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class PrizeRaffleListCreateView(generics.ListCreateAPIView):
+class PrizeRaffleCreateView(generics.CreateAPIView):
     queryset = PrizeRaffle.objects.all()
     serializer_class = PrizeRaffleSerializer
+
+class PrizeRaffleListView(generics.ListAPIView):
+    queryset = PrizeRaffle.objects.all()
+    serializer_class = CustomPrizeRaffleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrizeRaffleFilter
-
 
 class PrizeRaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = PrizeRaffle.objects.all()

@@ -95,7 +95,12 @@ class CustomTicketSerializer(serializers.ModelSerializer):
         depth = 2  
         
 class PrizeRaffleSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = PrizeRaffle
         fields = '__all__'  # Includes all fields in the model
+
+class CustomPrizeRaffleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PrizeRaffle
+        fields = '__all__'
+        depth = 2
