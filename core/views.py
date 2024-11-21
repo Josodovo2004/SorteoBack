@@ -2,20 +2,19 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .serializers import RegisterSerializer, LoginSerializer, PremioSorteoSerializer
+from .serializers import RegisterSerializer, LoginSerializer, PrizeRaffleSerializer
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import permissions
-from core.models import Sorteo, Ticket, Premio, PremioSorteo
-from .filters import UserFilter, TicketFilter, SorteoFilter, PremioFilter
-from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, SorteoSerializer, PremioSerializer, TicketSerializer, CustomTicketSerializer
+from core.models import Raffle, Ticket, Prize, PrizeRaffle
+from .filters import UserFilter, TicketFilter, RaffleFilter, PrizeFilter, PrizeRaffleFilter
+from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, RaffleSerializer, PrizeSerializer, TicketSerializer, CustomTicketSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 from rest_framework.permissions import IsAuthenticated
-
 
 
 class RegisterView(generics.CreateAPIView):
@@ -28,9 +27,6 @@ class RegisterView(generics.CreateAPIView):
         responses={201: openapi.Response("Created", schema=RegisterSerializer)}
     )
     def post(self, request, *args, **kwargs):
-        """
-        Registers a new user.
-        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -38,8 +34,6 @@ class RegisterView(generics.CreateAPIView):
             "message": "User created successfully",
             "user": serializer.data
         }, status=status.HTTP_201_CREATED)
-
-
 
 
 class LoginView(generics.GenericAPIView):
@@ -54,28 +48,25 @@ class LoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']  # Get the authenticated user
+        user = serializer.validated_data['user']
 
-        # Generate tokens using the CustomTokenObtainPairView logic
         refresh = RefreshToken.for_user(user)
         access = str(refresh.access_token)
-        serializedUser = UserSerializer(user).data
+        serialized_user = UserSerializer(user).data
 
-        # Set the refresh token in a secure cookie
         response = Response({
             'access': access,
-            'user_id': serializedUser['id'],
-            'username': serializedUser['username'],
+            'user_id': serialized_user['id'],
+            'username': serialized_user['username'],
         }, status=status.HTTP_200_OK)
 
-        # Set the refresh token in an HttpOnly, Secure cookie
         response.set_cookie(
             key='refresh_token',
             value=str(refresh),
             httponly=True,
-            secure=True,  # Ensure the cookie is sent over HTTPS
+            secure=True,
             samesite='Lax',
-            max_age=60 * 60 * 24 * 7  # 1 week
+            max_age=60 * 60 * 24 * 7
         )
 
         return response
@@ -83,37 +74,33 @@ class LoginView(generics.GenericAPIView):
 
 class UserListView(APIView):
     def get(self, request):
-        users = User.objects.all()  
+        users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+
 class UserRetrieveView(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
-    
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-
-        # Here you can add additional response data if needed
         response.data['custom_message'] = 'Welcome!'
-
-        # Set the refresh token in an HttpOnly, Secure cookie
         refresh_token = response.data['refresh']
         response.set_cookie(
             key='refresh_token',
             value=refresh_token,
-            httponly=True,   # Prevents JavaScript access
-            samesite='Lax',  # Adjust as necessary (can also use 'Strict')
-            max_age=60 * 60 * 24 * 7  # 1 week
+            httponly=True,
+            samesite='Lax',
+            max_age=60 * 60 * 24 * 7
         )
-
         return response
-    
-    
+
+
 class CustomTokenRefreshView(TokenRefreshView):
     permission_classes = (permissions.AllowAny,)
 
@@ -121,24 +108,22 @@ class CustomTokenRefreshView(TokenRefreshView):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
             return Response({'detail': 'Refresh token not found.'}, status=401)
-
-        # Pass the refresh token from the cookie to the super method
         data = {'refresh': refresh_token}
         request.data['refresh'] = refresh_token
         return super().post(request, *args, **kwargs)
-    
-class SorteoListView(generics.ListCreateAPIView):
-    queryset = Sorteo.objects.all()
-    serializer_class = SorteoSerializer
+
+
+class RaffleListView(generics.ListCreateAPIView):
+    queryset = Raffle.objects.all()
+    serializer_class = RaffleSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_class = SorteoFilter
+    filterset_class = RaffleFilter
 
 
-class SorteoDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Sorteo.objects.all()
-    serializer_class = SorteoSerializer
-    permission_classes = [IsAuthenticated]  # Require authentication
-
+class RaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Raffle.objects.all()
+    serializer_class = RaffleSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class TicketListView(generics.ListCreateAPIView):
@@ -151,40 +136,44 @@ class TicketListView(generics.ListCreateAPIView):
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = [IsAuthenticated]  # Require authentication
-
-
-
-class PremioListView(generics.ListCreateAPIView):
-    queryset = Premio.objects.all()
-    serializer_class = PremioSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = PremioFilter
-
-
-class PremioDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Premio.objects.all()
-    serializer_class = PremioSerializer
-    permission_classes = [IsAuthenticated]  # Require authentication
-    
-class PremioSorteoListCreateView(generics.ListCreateAPIView):
-    queryset = PremioSorteo.objects.all()
-    serializer_class = PremioSorteoSerializer
-    
-class PremioSorteoDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = PremioSorteo.objects.all()
-    serializer_class = PremioSorteoSerializer
-
-
-class SorteoView(APIView):
     permission_classes = [IsAuthenticated]
+
+
+class PrizeListView(generics.ListCreateAPIView):
+    queryset = Prize.objects.all()
+    serializer_class = PrizeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PrizeFilter
+
+
+class PrizeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Prize.objects.all()
+    serializer_class = PrizeSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class PrizeRaffleListCreateView(generics.ListCreateAPIView):
+    queryset = PrizeRaffle.objects.all()
+    serializer_class = PrizeRaffleSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PrizeRaffleFilter
+
+
+class PrizeRaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = PrizeRaffle.objects.all()
+    serializer_class = PrizeRaffleSerializer
+
+
+class RaffleView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
-        operation_description="Retrieve the winner of a specified Sorteo (raffle).",
+        operation_description="Retrieve the winner of a specified Raffle.",
         manual_parameters=[
             openapi.Parameter(
-                'id_sorteo',
+                'raffle_id',
                 openapi.IN_QUERY,
-                description="ID of the Sorteo (raffle).",
+                description="ID of the Raffle.",
                 type=openapi.TYPE_INTEGER,
                 required=True,
             ),
@@ -195,88 +184,68 @@ class SorteoView(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'ganador': openapi.Schema(
+                        'winner': openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             description="Details of the winning ticket.",
-                            properties={
-                                'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                'precio': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                'usuario': openapi.Schema(
-                                    type=openapi.TYPE_OBJECT,
-                                    description="Details of the ticket holder."
-                                ),
-                                'sorteo': openapi.Schema(
-                                    type=openapi.TYPE_OBJECT,
-                                    description="Details of the Sorteo (raffle)."
-                                ),
-                            },
                         ),
                     },
                 ),
             ),
             400: "Bad Request: Missing or invalid parameters.",
-            404: "Not Found: Sorteo or tickets not found.",
+            404: "Not Found: Raffle or tickets not found.",
         },
     )
     def get(self, request):
-        id_sorteo = request.query_params.get('id_sorteo')
-
-        # Validate that id_sorteo is provided
-        if not id_sorteo:
+        raffle_id = request.query_params.get('raffle_id')
+        if not raffle_id:
             return Response(
-                {"error": "The 'id_sorteo' parameter is required."},
+                {"error": "The 'raffle_id' parameter is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            id_sorteo = int(id_sorteo)
+            raffle_id = int(raffle_id)
         except ValueError:
             return Response(
-                {"error": "The 'id_sorteo' parameter must be an integer."},
+                {"error": "The 'raffle_id' parameter must be an integer."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Fetch the Sorteo object
-        sorteo = Sorteo.objects.filter(id=id_sorteo).first()
-        if not sorteo:
+        raffle = Raffle.objects.filter(id=raffle_id).first()
+        if not raffle:
             return Response(
-                {"error": f"Sorteo with id {id_sorteo} not found."},
+                {"error": f"Raffle with id {raffle_id} not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Fetch tickets associated with the Sorteo
-        lista_tickets = list(Ticket.objects.filter(sorteo=sorteo))
-        if not lista_tickets:
+        tickets = list(Ticket.objects.filter(raffle=raffle))
+        if not tickets:
             return Response(
-                {"error": f"No tickets found for Sorteo with id {id_sorteo}."},
+                {"error": f"No tickets found for Raffle with id {raffle_id}."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Shuffle tickets to pick a winner
-        random.shuffle(lista_tickets)
-        winnerNumber = random.randint(0, len(lista_tickets))
-        ganador = lista_tickets[winnerNumber]
+        random.shuffle(tickets)
+        winner_index = random.randint(0, len(tickets) - 1)
+        winner = tickets[winner_index]
+        winner.is_winner = True
+        winner.save()
 
-        # Mark the winning ticket
-        ganador.ganador = True
-        ganador.save()  # Save the update to the database
+        winner_ticket = CustomTicketSerializer(winner).data
+        return Response({'winner': winner_ticket}, status=status.HTTP_200_OK)
 
-        # Serialize the winning ticket
-        winner_ticket = CustomTicketSerializer(ganador).data
 
-        return Response({'ganador': winner_ticket}, status=status.HTTP_200_OK)
-
-class GetTicketPagados(APIView):
+class GetPaidTickets(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Get Paid Tickets",
-        operation_description="Returns the count of paid tickets (`estado=True`) for a given Sorteo identified by `id_sorteo`.",
+        operation_description="Returns the count of paid tickets (`status=True`) for a given Raffle identified by `raffle_id`.",
         manual_parameters=[
             openapi.Parameter(
-                name="id_sorteo",
+                name="raffle_id",
                 in_=openapi.IN_QUERY,
-                description="The ID of the Sorteo to retrieve paid tickets for.",
+                description="The ID of the Raffle to retrieve paid tickets for.",
                 type=openapi.TYPE_INTEGER,
                 required=True,
             ),
@@ -284,53 +253,41 @@ class GetTicketPagados(APIView):
         responses={
             200: openapi.Response(
                 description="Successful response with the count of paid tickets.",
-                examples={"application/json": {"tickets_pagados": 5}},
+                examples={"application/json": {"paid_tickets": 5}},
             ),
             400: openapi.Response(
-                description="Bad Request - Missing or invalid `id_sorteo`.",
-                examples={"application/json": {"error": "The 'id_sorteo' parameter must be an integer."}},
+                description="Bad Request - Missing or invalid `raffle_id`.",
+                examples={"application/json": {"error": "The 'raffle_id' parameter must be an integer."}},
             ),
             404: openapi.Response(
-                description="Not Found - Sorteo or tickets not found.",
-                examples={"application/json": {"error": "Sorteo with id 123 not found."}},
+                description="Not Found - Raffle or tickets not found.",
+                examples={"application/json": {"error": "Raffle with id 123 not found."}},
             ),
         },
     )
     def get(self, request):
-        id_sorteo = request.query_params.get('id_sorteo')
-        if not id_sorteo:
+        raffle_id = request.query_params.get('raffle_id')
+        if not raffle_id:
             return Response(
-                {"error": "The 'id_sorteo' parameter is required."},
+                {"error": "The 'raffle_id' parameter is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            id_sorteo = int(id_sorteo)
+            raffle_id = int(raffle_id)
         except ValueError:
             return Response(
-                {"error": "The 'id_sorteo' parameter must be an integer."},
+                {"error": "The 'raffle_id' parameter must be an integer."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Fetch the Sorteo object
-        sorteo = Sorteo.objects.filter(id=id_sorteo).first()
-        if not sorteo:
+        raffle = Raffle.objects.filter(id=raffle_id).first()
+        if not raffle:
             return Response(
-                {"error": f"Sorteo with id {id_sorteo} not found."},
+                {"error": f"Raffle with id {raffle_id} not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Fetch tickets associated with the Sorteo
-        lista_tickets = list(Ticket.objects.filter(sorteo=sorteo))
-        if not lista_tickets:
-            return Response(
-                {"error": f"No tickets found for Sorteo with id {id_sorteo}."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        paid_tickets_count = Ticket.objects.filter(raffle=raffle, status=True).count()
 
-        ticektsPagados = 0
-        for ticket in lista_tickets:
-            if ticket.estado == True:
-                ticektsPagados += 1
-        
-        return Response({'tickets_pagados': ticektsPagados}, status=status.HTTP_200_OK)
+        return Response({"paid_tickets": paid_tickets_count}, status=status.HTTP_200_OK)

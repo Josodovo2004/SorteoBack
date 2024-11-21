@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 import django_filters
-from .models import Sorteo, Ticket, Premio, PremioSorteo
+from .models import Raffle, Ticket, Prize, PrizeRaffle
 
 
 class UserFilter(django_filters.FilterSet):
@@ -13,45 +13,42 @@ class UserFilter(django_filters.FilterSet):
         fields = ['username', 'email', 'is_active']
 
 
-
-
-class SorteoFilter(django_filters.FilterSet):
-    nombre = django_filters.CharFilter(lookup_expr='icontains')
-    usuario = django_filters.ModelChoiceFilter(queryset=User.objects.all())
-    precioTickets_min = django_filters.NumberFilter(field_name="precioTickets", lookup_expr='gte')
-    precioTickets_max = django_filters.NumberFilter(field_name="precioTickets", lookup_expr='lte')
-    fechaSorteo = django_filters.DateFromToRangeFilter()
+class RaffleFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(lookup_expr='icontains')
+    user = django_filters.ModelChoiceFilter(queryset=User.objects.all())
+    ticket_price_min = django_filters.NumberFilter(field_name="ticket_price", lookup_expr='gte')
+    ticket_price_max = django_filters.NumberFilter(field_name="ticket_price", lookup_expr='lte')
+    draw_date = django_filters.DateFromToRangeFilter()
 
     class Meta:
-        model = Sorteo
-        fields = ['nombre', 'nombrePublico', 'usuario', 'precioTickets', 'fechaSorteo']
+        model = Raffle
+        fields = ['name', 'public_name', 'user', 'ticket_price', 'draw_date']
 
 
 class TicketFilter(django_filters.FilterSet):
-    sorteo = django_filters.ModelChoiceFilter(queryset=Sorteo.objects.all())
-    nombreComprador = django_filters.CharFilter(lookup_expr='icontains')
-    correo = django_filters.CharFilter(lookup_expr='icontains')
-    estado = django_filters.BooleanFilter()
-    fechaVenta = django_filters.DateFromToRangeFilter()
+    raffle = django_filters.ModelChoiceFilter(queryset=Raffle.objects.all())
+    buyer_name = django_filters.CharFilter(lookup_expr='icontains')
+    email = django_filters.CharFilter(lookup_expr='icontains')
+    status = django_filters.BooleanFilter()
+    sale_date = django_filters.DateFromToRangeFilter()
 
     class Meta:
         model = Ticket
-        fields = ['sorteo', 'ganador', 'nombreComprador', 'correo', 'estado', 'fechaVenta']
+        fields = ['raffle', 'is_winner', 'buyer_name', 'email', 'status', 'sale_date']
 
 
-class PremioFilter(django_filters.FilterSet):
-    nombre = django_filters.CharFilter(lookup_expr='icontains')
-
-    class Meta:
-        model = Premio
-        fields = ['nombre']
-
-
-
-class PremioSorteoFilter(django_filters.FilterSet):
-    premio = django_filters.ModelChoiceFilter(queryset=Premio.objects.all())
-    sorteo = django_filters.ModelChoiceFilter(queryset=Sorteo.objects.all())
+class PrizeFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
-        model = PremioSorteo
-        fields = ['premio', 'sorteo']
+        model = Prize
+        fields = ['name']
+
+
+class PrizeRaffleFilter(django_filters.FilterSet):
+    prize = django_filters.ModelChoiceFilter(queryset=Prize.objects.all())
+    raffle = django_filters.ModelChoiceFilter(queryset=Raffle.objects.all())
+
+    class Meta:
+        model = PrizeRaffle
+        fields = ['prize', 'raffle']
