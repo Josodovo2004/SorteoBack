@@ -4,7 +4,7 @@ from .views import (RegisterView, LoginView,
                    SorteoListView, SorteoDetailView,
                    PremioListView, PremioDetailView,
                    TicketListView, TicketDetailView,
-                   SorteoView,
+                   SorteoView, GetTicketPagados,
                    PremioSorteoDetailView, PremioSorteoListCreateView,
                    CustomTokenObtainPairView, CustomTokenRefreshView
                    )

@@ -265,3 +265,44 @@ class SorteoView(APIView):
         winner_ticket = CustomTicketSerializer(ganador).data
 
         return Response({'ganador': winner_ticket}, status=status.HTTP_200_OK)
+
+class GetTicketPagados(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        id_sorteo = request.query_params.get('id_sorteo')
+        if not id_sorteo:
+            return Response(
+                {"error": "The 'id_sorteo' parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            id_sorteo = int(id_sorteo)
+        except ValueError:
+            return Response(
+                {"error": "The 'id_sorteo' parameter must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Fetch the Sorteo object
+        sorteo = Sorteo.objects.filter(id=id_sorteo).first()
+        if not sorteo:
+            return Response(
+                {"error": f"Sorteo with id {id_sorteo} not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Fetch tickets associated with the Sorteo
+        lista_tickets = list(Ticket.objects.filter(sorteo=sorteo))
+        if not lista_tickets:
+            return Response(
+                {"error": f"No tickets found for Sorteo with id {id_sorteo}."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        ticektsPagados = 0
+        for ticket in lista_tickets:
+            if ticket.estado == True:
+                ticektsPagados += 1
+        
+        return Response({'tickets_pagados': ticektsPagados})
