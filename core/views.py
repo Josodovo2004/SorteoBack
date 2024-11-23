@@ -123,7 +123,6 @@ class RaffleListView(generics.ListCreateAPIView):
 class RaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Raffle.objects.all()
     serializer_class = RaffleSerializer
-    permission_classes = [IsAuthenticated]
 
 
 class TicketListView(generics.ListCreateAPIView):
@@ -136,7 +135,6 @@ class TicketListView(generics.ListCreateAPIView):
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = [IsAuthenticated]
 
 
 class PrizeListView(generics.ListCreateAPIView):
@@ -149,7 +147,6 @@ class PrizeListView(generics.ListCreateAPIView):
 class PrizeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Prize.objects.all()
     serializer_class = PrizeSerializer
-    permission_classes = [IsAuthenticated]
 
 
 class PrizeRaffleCreateView(generics.CreateAPIView):
@@ -239,7 +236,6 @@ class RaffleView(APIView):
 
 
 class GetPaidTickets(APIView):
-    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="Get Paid Tickets",
