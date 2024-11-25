@@ -87,17 +87,22 @@ class PrizeSerializer(serializers.ModelSerializer):
         model = Prize
         fields = '__all__'
 
+class CustomRaffleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Raffle
+        fields = ['id', 'name']
+
 
 class CustomTicketSerializer(serializers.ModelSerializer):
+    raffle = CustomRaffleSerializer()
     class Meta:
         model = Ticket
         fields = '__all__' 
-        depth = 2  
         
 class PrizeRaffleSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrizeRaffle
-        fields = '__all__'  # Includes all fields in the model
+        fields = '__all__'  
 
 class CustomPrizeRaffleSerializer(serializers.ModelSerializer):
     class Meta:

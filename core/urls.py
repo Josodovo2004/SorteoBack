@@ -3,7 +3,7 @@ from .views import (RegisterView, LoginView,
                    UserListView, UserRetrieveView,
                    RaffleListView, RaffleDetailView,
                    PrizeListView, PrizeDetailView,
-                   TicketListView, TicketDetailView,
+                   TicketView, TicketDetailView,
                    RaffleView, GetPaidTickets,
                    PrizeRaffleListView, PrizeRaffleCreateView, PrizeRaffleDetailView,
                    CustomTokenObtainPairView, CustomTokenRefreshView
@@ -23,7 +23,7 @@ urlpatterns = [
     path('prizes/', PrizeListView.as_view(), name='prizes-list-create'),
     path('prizes/<int:pk>/', PrizeDetailView.as_view(), name='prizes-detail'),
 
-    path('tickets/', TicketListView.as_view(), name='tickets-list-create'),
+    path('tickets/', TicketView.as_view(), name='tickets-list-create'),
     path('tickets/<int:pk>/', TicketDetailView.as_view(), name='tickets-detail'),
     
     path('prize-raffle-list/', PrizeRaffleListView.as_view(), name='prize-raffle-list-list'),

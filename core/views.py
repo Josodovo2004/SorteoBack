@@ -11,10 +11,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import permissions
 from core.models import Raffle, Ticket, Prize, PrizeRaffle
 from .filters import UserFilter, TicketFilter, RaffleFilter, PrizeFilter, PrizeRaffleFilter
-from .serializers import UserSerializer, LoginSerializer, RegisterSerializer, RaffleSerializer, PrizeSerializer, TicketSerializer, CustomTicketSerializer, CustomPrizeRaffleSerializer
+from .serializers import (UserSerializer, LoginSerializer, 
+                          RegisterSerializer, RaffleSerializer, 
+                          PrizeSerializer, TicketSerializer, 
+                          CustomTicketSerializer, CustomPrizeRaffleSerializer)
 from django_filters.rest_framework import DjangoFilterBackend
 import random
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class RegisterView(generics.CreateAPIView):
@@ -119,17 +122,32 @@ class RaffleListView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = RaffleFilter
 
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]  
+        return [AllowAny()]
+
 
 class RaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Raffle.objects.all()
     serializer_class = RaffleSerializer
 
 
-class TicketListView(generics.ListCreateAPIView):
+class TicketView(generics.ListCreateAPIView):
     queryset = Ticket.objects.all()
-    serializer_class = TicketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TicketFilter
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return TicketSerializer  
+        return CustomTicketSerializer 
+    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]  
+        return [AllowAny()] 
 
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -142,6 +160,11 @@ class PrizeListView(generics.ListCreateAPIView):
     serializer_class = PrizeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrizeFilter
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]  
+        return [AllowAny()]
 
 
 class PrizeDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -158,6 +181,11 @@ class PrizeRaffleListView(generics.ListAPIView):
     serializer_class = CustomPrizeRaffleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PrizeRaffleFilter
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]  
+        return [AllowAny()]
 
 class PrizeRaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = PrizeRaffle.objects.all()

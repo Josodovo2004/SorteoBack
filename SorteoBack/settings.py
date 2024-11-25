@@ -89,7 +89,7 @@ DATABASES = {
         "ENGINE": 'django.db.backends.postgresql',
         "NAME": 'SorteoBack',
         "USER": 'postgres',
-        "PASSWORD": '1234',
+        "PASSWORD": 'Jose_d@vid2004',
         "HOST": 'db',
         "PORT": '5432',
     }
@@ -104,6 +104,7 @@ except Exception as e:
     
     # Set fallback values
     DATABASES["default"]["HOST"] = "localhost"
+
 
 
 # Password validation
