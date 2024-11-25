@@ -66,7 +66,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']  # Include other fields as needed
+        fields = ['id', 'username', 'email', 'first_name', 'last_name'] 
 
 class RaffleSerializer(serializers.ModelSerializer):
 
@@ -109,3 +109,31 @@ class CustomPrizeRaffleSerializer(serializers.ModelSerializer):
         model = PrizeRaffle
         fields = '__all__'
         depth = 2
+
+class CustomPrizeSerializer(serializers.ModelSerializer):
+    winner = TicketSerializer(source='prizeraffle_set.winnerTicket', read_only=True)
+
+    class Meta:
+        model = Prize
+        fields = ['id', 'name', 'description', 'image', 'winner']
+
+class CustomRaffleSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    prizes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Raffle
+        fields = [
+            'id', 'ticket_limit', 'name', 'public_name', 'description', 
+            'image', 'ticket_price', 'raffle_date', 'user', 'prizes'
+        ]
+
+    def get_prizes(self, obj):
+        prizeraffles = PrizeRaffle.objects.filter(raffle=obj)
+        return [
+            {
+                "prize": CustomPrizeSerializer(prizeraffle.prize).data,
+                "winner": TicketSerializer(prizeraffle.winnerTicket).data if prizeraffle.winnerTicket else None,
+            }
+            for prizeraffle in prizeraffles
+        ]
