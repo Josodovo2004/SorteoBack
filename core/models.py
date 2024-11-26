@@ -18,7 +18,7 @@ class Ticket(models.Model):
     buyer_name = models.CharField(max_length=100, null=True)
     email = models.CharField(max_length=250, null=True)
     phone_number = models.CharField(max_length=15, null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_paid = models.BooleanField(default=False)
     sale_date = models.DateTimeField(null=True)
     total_paid = models.FloatField(default=0.00)

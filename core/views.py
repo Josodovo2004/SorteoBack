@@ -371,7 +371,7 @@ class GetPaidTickets(APIView):
 
 class WinnersListApiView(APIView):
     @swagger_auto_schema(
-        operation_description="Retrieve the winners of a specific Raffle.",
+        operation_description="Retrieve the winners of a specific Raffle. The tickets must have the is_paid and is_active field set to True in orde to be taken in consideration",
         manual_parameters=[
             openapi.Parameter(
                 'raffle_id',
