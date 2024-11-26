@@ -458,33 +458,7 @@ class WinnersListApiView(APIView):
 class SetTicketsPaidView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-    method='post',
-    operation_description="Update tickets by their IDs and raffle ID",
-    request_body=openapi.Schema(
-        type=openapi.TYPE_OBJECT,
-        properties={
-            'tickets': openapi.Schema(
-                type=openapi.TYPE_ARRAY,
-                items=openapi.Items(type=openapi.TYPE_INTEGER),
-                description='List of ticket IDs to be updated.'
-            ),
-            'raffle_id': openapi.Schema(
-                type=openapi.TYPE_INTEGER,
-                description='ID of the raffle for filtering the tickets.'
-            ),
-        },
-    ),
-    responses={
-        200: openapi.Response(
-            description="Tickets updated successfully",
-            schema=TicketSerializer(many=True)
-        ),
-        400: openapi.Response(
-            description="Invalid input or missing raffle_id"
-            ),
-        }
-    )
+    
     def post(self, request):
         ticket_ids = request.data.get('tickets', [])
         raffle_id = request.data.get('raffle_id')
