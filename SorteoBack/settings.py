@@ -89,7 +89,7 @@ DATABASES = {
         "ENGINE": 'django.db.backends.postgresql',
         "NAME": 'SorteoBack',
         "USER": 'postgres',
-        "PASSWORD": '1234',
+        "PASSWORD": 'Jose_d@vid2004',
         "HOST": 'db',
         "PORT": '5432',
     }

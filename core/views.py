@@ -364,7 +364,7 @@ class GetPaidTickets(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        paid_tickets_count = Ticket.objects.filter(raffle=raffle, id_paid=True).count()
+        paid_tickets_count = Ticket.objects.filter(raffle=raffle, is_paid=True).count()
 
         return Response({"paid_tickets": paid_tickets_count}, status=status.HTTP_200_OK)
 
