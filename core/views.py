@@ -118,15 +118,15 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 
 class RaffleListView(generics.ListCreateAPIView):
-    queryset = Raffle.objects.all()
+    queryset = Raffle.objects.all().order_by('-raffle_date')
     serializer_class = RaffleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = RaffleFilter
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]  
-        return [AllowAny()]
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -138,9 +138,9 @@ class RaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Raffle.objects.all()
     serializer_class = RaffleSerializer
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]  
-        return [AllowAny()]
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 
 class TicketView(generics.ListCreateAPIView):
@@ -155,14 +155,19 @@ class TicketView(generics.ListCreateAPIView):
         return CustomTicketSerializer 
     
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]  
-        return [AllowAny()] 
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 
 class PrizeListView(generics.ListCreateAPIView):
@@ -172,19 +177,27 @@ class PrizeListView(generics.ListCreateAPIView):
     filterset_class = PrizeFilter
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]  
-        return [AllowAny()]
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 
 class PrizeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Prize.objects.all()
     serializer_class = PrizeSerializer
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 
 class PrizeRaffleCreateView(generics.CreateAPIView):
     queryset = PrizeRaffle.objects.all()
     serializer_class = PrizeRaffleSerializer
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 class PrizeRaffleListView(generics.ListAPIView):
     queryset = PrizeRaffle.objects.all()
@@ -193,13 +206,18 @@ class PrizeRaffleListView(generics.ListAPIView):
     filterset_class = PrizeRaffleFilter
 
     def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]  
-        return [AllowAny()]
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 class PrizeRaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = PrizeRaffle.objects.all()
     serializer_class = PrizeRaffleSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]      
+        return [IsAuthenticated()]
 
 
 class RaffleView(APIView):
@@ -269,7 +287,7 @@ class RaffleView(APIView):
         prize = Prize.objects.filter(id=prize_id).first()  
 
         prizeRaffle = PrizeRaffle.objects.filter(raffle__id=raffle.id, prize__id=prize.id).first()
-        if not prizeRaffle.exists():
+        if not prizeRaffle:
             return Response(
                 {"error": f"Prize with id {prize_id} not found in Raffle {raffle_id}."},
                 status=status.HTTP_404_NOT_FOUND,
@@ -347,3 +365,89 @@ class GetPaidTickets(APIView):
         paid_tickets_count = Ticket.objects.filter(raffle=raffle, status=True).count()
 
         return Response({"paid_tickets": paid_tickets_count}, status=status.HTTP_200_OK)
+
+
+class WinnersListApiView(APIView):
+    @swagger_auto_schema(
+        operation_description="Retrieve the winners of a specific Raffle.",
+        manual_parameters=[
+            openapi.Parameter(
+                'raffle_id',
+                openapi.IN_QUERY,
+                description="ID of the Raffle for which to retrieve the winners.",
+                type=openapi.TYPE_INTEGER,
+                required=True,
+            ),
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of winners with their prizes.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "id": openapi.Schema(type=openapi.TYPE_INTEGER, description="PrizeRaffle ID."),
+                            "prize": openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER, description="Prize ID."),
+                                    "name": openapi.Schema(type=openapi.TYPE_STRING, description="Prize name."),
+                                    "description": openapi.Schema(type=openapi.TYPE_STRING, description="Prize description."),
+                                    "image": openapi.Schema(type=openapi.TYPE_STRING, description="Prize image URL."),
+                                },
+                                description="Details of the prize.",
+                            ),
+                            "winnerTicket": openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    "id": openapi.Schema(type=openapi.TYPE_INTEGER, description="Winning ticket ID."),
+                                    "buyer_name": openapi.Schema(type=openapi.TYPE_STRING, description="Buyer's name."),
+                                    "email": openapi.Schema(type=openapi.TYPE_STRING, description="Buyer's email."),
+                                    "phone_number": openapi.Schema(type=openapi.TYPE_STRING, description="Buyer's phone number."),
+                                    "total_paid": openapi.Schema(type=openapi.TYPE_NUMBER, format="float", description="Total amount paid for the ticket."),
+                                    "is_winner": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Whether the ticket is a winner."),
+                                },
+                                description="Details of the winning ticket.",
+                            ),
+                        },
+                    ),
+                ),
+            ),
+            400: "Bad Request: Missing or invalid 'raffle_id'.",
+            404: "Not Found: Raffle or winners not found.",
+        },
+    )
+    def get(self, request):
+        raffle_id = request.query_params.get('raffle_id')
+        if not raffle_id:
+            return Response(
+                {"error": "The 'raffle_id' parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            raffle_id = int(raffle_id)
+        except ValueError:
+            return Response(
+                {"error": "The 'raffle_id' parameter must be an integer."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        raffle = Raffle.objects.filter(id=raffle_id).first()
+        if not raffle:
+            return Response(
+                {"error": f"Raffle with id {raffle_id} not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        prizes = PrizeRaffle.objects.filter(raffle__id=raffle.id)
+        winners = []
+
+        for prize in prizes:
+            if prize.winnerTicket:
+                winners.append(prize)
+        
+        serializedWinners = CustomPrizeRaffleSerializer(winners, many=True).data
+
+        return Response(serializedWinners, status=status.HTTP_200_OK)

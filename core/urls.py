@@ -6,7 +6,8 @@ from .views import (RegisterView, LoginView,
                    TicketView, TicketDetailView,
                    RaffleView, GetPaidTickets,
                    PrizeRaffleListView, PrizeRaffleCreateView, PrizeRaffleDetailView,
-                   CustomTokenObtainPairView, CustomTokenRefreshView
+                   CustomTokenObtainPairView, CustomTokenRefreshView,
+                   WinnersListApiView,
                    )
 urlpatterns = [
     
@@ -33,4 +34,6 @@ urlpatterns = [
     path('make-raffle/', RaffleView.as_view(), name='make-raffle'),
 
     path('paid-tickets/', GetPaidTickets.as_view(), name='paid-tickets'),
+
+    path('raffle-winners/', WinnersListApiView.as_view(), name='raffle-winners')
 ]
