@@ -459,66 +459,51 @@ class SetTicketsPaidView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="Set Tickets Paid",
-        operation_description="Updates tickets specified by their IDs, marking them as paid and active.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'ids': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_INTEGER),
-                    description="List of ticket IDs to be updated."
-                )
-            },
-            required=['ids'],
-            description="A JSON object containing a list of ticket IDs."
-        ),
-        responses={
-            200: openapi.Response(
-                description="Tickets successfully updated.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'tickets': openapi.Schema(
-                            type=openapi.TYPE_ARRAY,
-                            items=openapi.Schema(
-                                type=openapi.TYPE_OBJECT,
-                                properties={
-                                    'id': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'raffle': openapi.Schema(type=openapi.TYPE_INTEGER),
-                                    'is_winner': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                                    'buyer_name': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'email': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'phone_number': openapi.Schema(type=openapi.TYPE_STRING),
-                                    'is_active': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                                    'is_paid': openapi.Schema(type=openapi.TYPE_BOOLEAN),
-                                    'sale_date': openapi.Schema(type=openapi.FORMAT_DATETIME),
-                                    'total_paid': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                }
-                            )
-                        )
-                    }
-                )
+    method='post',
+    operation_description="Update tickets by their IDs and raffle ID",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'tickets': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+                description='List of ticket IDs to be updated.'
             ),
-            400: openapi.Response(
-                description="Invalid input or bad request.",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
-            )
+            'raffle_id': openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                description='ID of the raffle for filtering the tickets.'
+            ),
+        },
+    ),
+    responses={
+        200: openapi.Response(
+            description="Tickets updated successfully",
+            schema=TicketSerializer(many=True)
+        ),
+        400: openapi.Response(
+            description="Invalid input or missing raffle_id"
+            ),
         }
     )
     def post(self, request):
-        ticket_ids = request.data.get('ids', [])
+        ticket_ids = request.data.get('tickets', [])
+        raffle_id = request.data.get('raffle_id')
+
         
         if not isinstance(ticket_ids, list):
-            return Response({"error": "Invalid input, 'ids' should be a list of ticket IDs."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Invalid input, 'tickets' should be a list of ticket IDs."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not raffle_id:
+            return Response({"error": "Raffle ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
         
-        updated_count = Ticket.objects.filter(id__in=ticket_ids).update(is_paid=True, is_active=True)
+        updated_tickets = Ticket.objects.filter(id__in=ticket_ids, raffle__id=int(raffle_id)) \
+            .update(is_paid=True, is_active=True)
+
         
-        serializedTickets = TicketSerializer(updated_count, many=True).data
+        tickets = Ticket.objects.filter(id__in=ticket_ids, raffle__id=int(raffle_id))
+
         
-        return Response({"tickets": serializedTickets}, status=status.HTTP_200_OK)
+        serialized_tickets = TicketSerializer(tickets, many=True).data
+
+        return Response({"tickets": serialized_tickets}, status=status.HTTP_200_OK)
