@@ -293,16 +293,18 @@ class RaffleView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        tickets = list(Ticket.objects.filter(raffle=raffle, prize=prize))  
+        tickets = list(Ticket.objects.filter(raffle=raffle, is_paid=True,is_active=True))  
         if not tickets:
             return Response(
-                {"error": f"No tickets found for Prize {prize_id} in Raffle {raffle_id}."},
+                {"error": f"No tickets found for Raffle {raffle_id}."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         random.shuffle(tickets)
         winner_index = random.randint(0, len(tickets) - 1)
         winner = tickets[winner_index]
+        prizeRaffle.winnerTicket =winner
+        prizeRaffle.save()
         winner.is_winner = True
         winner.save()
 
@@ -362,7 +364,7 @@ class GetPaidTickets(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        paid_tickets_count = Ticket.objects.filter(raffle=raffle, status=True).count()
+        paid_tickets_count = Ticket.objects.filter(raffle=raffle, id_paid=True).count()
 
         return Response({"paid_tickets": paid_tickets_count}, status=status.HTTP_200_OK)
 
