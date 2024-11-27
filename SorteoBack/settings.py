@@ -89,7 +89,7 @@ DATABASES = {
         "ENGINE": 'django.db.backends.postgresql',
         "NAME": 'SorteoBack',
         "USER": 'postgres',
-        "PASSWORD": '1234',
+        "PASSWORD": 'Jose_d@vid2004',
         "HOST": 'db',
         "PORT": '5432',
     }
@@ -149,6 +149,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -161,7 +163,6 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',  # For application/x-www-form-urlencoded
         'rest_framework.parsers.MultiPartParser',  # For handling file uploads
     ],
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 from datetime import timedelta

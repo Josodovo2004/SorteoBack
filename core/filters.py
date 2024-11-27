@@ -25,16 +25,20 @@ class RaffleFilter(filters.FilterSet):
 
 
 class TicketFilter(filters.FilterSet):
-    is_winner = filters.BooleanFilter(field_name="is_winner")
-    is_active = filters.BooleanFilter(field_name="is_active")
-    is_paid = filters.BooleanFilter(field_name="is_paid")
-    sale_date_range = filters.DateFromToRangeFilter(field_name="sale_date")
-    total_paid_min = filters.NumberFilter(field_name="total_paid", lookup_expr="gte")
-    total_paid_max = filters.NumberFilter(field_name="total_paid", lookup_expr="lte")
+    # Custom filters for specific use cases
+    raffle = filters.NumberFilter(field_name='raffle__id', lookup_expr='exact')
+    buyer_name = filters.CharFilter(lookup_expr='icontains')  # Case-insensitive partial match
+    email = filters.CharFilter(lookup_expr='icontains')
+    phone_number = filters.CharFilter(lookup_expr='icontains')
+    sale_date = filters.DateFromToRangeFilter()  # Range filter for dates
+    total_paid = filters.RangeFilter()  # Range filter for numerical values
 
     class Meta:
         model = Ticket
-        fields = ['raffle', 'is_winner', 'is_active', 'is_paid', 'sale_date_range', 'total_paid_min', 'total_paid_max']
+        fields = [
+            'raffle', 'is_winner', 'buyer_name', 'email', 'phone_number',
+            'is_active', 'is_paid', 'sale_date', 'total_paid'
+        ]
 
 
 class PrizeFilter(filters.FilterSet):

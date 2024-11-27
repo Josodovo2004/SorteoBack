@@ -147,7 +147,6 @@ class TicketView(generics.ListCreateAPIView):
     queryset = Ticket.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = TicketFilter
-    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
