@@ -153,11 +153,6 @@ class TicketView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return TicketSerializer  
         return CustomTicketSerializer 
-    
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]      
-        return [IsAuthenticated()]
 
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
