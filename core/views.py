@@ -137,10 +137,10 @@ class RaffleListView(generics.ListCreateAPIView):
 class RaffleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Raffle.objects.all()
     serializer_class = RaffleSerializer
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [AllowAny()]      
-        return [IsAuthenticated()]
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]      
+    #     return [IsAuthenticated()]
 
 
 class TicketView(generics.ListCreateAPIView):
