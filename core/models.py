@@ -22,6 +22,17 @@ class Ticket(models.Model):
     is_paid = models.BooleanField(default=False)
     sale_date = models.DateTimeField(null=True)
     total_paid = models.FloatField(default=0.00)
+    ticketNumber = models.IntegerField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.ticketNumber:
+            # Get the last ticket for the same raffle and increment its ticketNumber
+            last_ticket = Ticket.objects.filter(raffle=self.raffle).order_by('ticketNumber').last()
+            self.ticketNumber = (last_ticket.ticketNumber + 1) if last_ticket.ticketNumber else 1
+            if self.ticketNumber is None:
+                self.ticketNumber = 1
+        super().save(*args, **kwargs)
+
 
 class Prize(models.Model):
     name = models.CharField(max_length=200, null=True)

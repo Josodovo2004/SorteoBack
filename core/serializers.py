@@ -76,10 +76,10 @@ class RaffleSerializer(serializers.ModelSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Ticket
-        fields = '__all__'
+        exclude = ['ticketNumber']
+
 
 
 class PrizeSerializer(serializers.ModelSerializer):
@@ -111,7 +111,7 @@ class CustomPrizeRaffleSerializer(serializers.ModelSerializer):
         depth = 2
 
 class CustomPrizeSerializer(serializers.ModelSerializer):
-    winner = TicketSerializer(source='prizeraffle_set.winnerTicket', read_only=True)
+    winner = CustomTicketSerializer(source='prizeraffle_set.winnerTicket', read_only=True)
 
     class Meta:
         model = Prize
