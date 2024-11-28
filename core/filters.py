@@ -36,7 +36,7 @@ class TicketFilter(filters.FilterSet):
     class Meta:
         model = Ticket
         fields = [
-            'raffle', 'is_winner', 'buyer_name', 'email', 'phone_number',
+            'raffle', 'buyer_name', 'email', 'phone_number',
             'is_active', 'is_paid', 'sale_date', 'total_paid'
         ]
 

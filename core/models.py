@@ -14,7 +14,6 @@ class Raffle(models.Model):
 
 class Ticket(models.Model):
     raffle = models.ForeignKey(Raffle, on_delete=models.CASCADE)
-    is_winner = models.BooleanField(default=False)
     buyer_name = models.CharField(max_length=100, null=True)
     email = models.CharField(max_length=250, null=True)
     phone_number = models.CharField(max_length=15, null=True)
