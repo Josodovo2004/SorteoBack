@@ -5,7 +5,7 @@ class Raffle(models.Model):
     ticket_limit = models.IntegerField(null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, null=True)
-    public_name = models.CharField(max_length=50, null=True)
+    public_name = models.CharField(max_length=50, null=True, unique=True)
     description = models.TextField(max_length=500, null=True)
     image = models.CharField(max_length=500, null=True)
     ticket_price = models.FloatField(null=True)
