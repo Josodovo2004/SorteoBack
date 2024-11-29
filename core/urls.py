@@ -7,7 +7,8 @@ from .views import (RegisterView, LoginView,
                    RaffleView, GetPaidTickets,
                    PrizeRaffleListView, PrizeRaffleCreateView, PrizeRaffleDetailView,
                    CustomTokenObtainPairView, CustomTokenRefreshView,
-                   WinnersListApiView, SetTicketsPaidView
+                   WinnersListApiView, SetTicketsPaidView,
+                   CreateManyTickets,
                    )
 urlpatterns = [
     
@@ -37,5 +38,7 @@ urlpatterns = [
 
     path('raffle-winners/', WinnersListApiView.as_view(), name='raffle-winners'),
     
-    path('set-tickets-paid/', SetTicketsPaidView.as_view(), name='set-tickets-paid')
+    path('set-tickets-paid/', SetTicketsPaidView.as_view(), name='set-tickets-paid'),
+
+    path('crate-many-tickets/', CreateManyTickets.as_view(), name='crate-many-tickets')
 ]

@@ -27,9 +27,12 @@ class Ticket(models.Model):
         if not self.ticketNumber:
             # Get the last ticket for the same raffle and increment its ticketNumber
             last_ticket = Ticket.objects.filter(raffle=self.raffle).order_by('ticketNumber').last()
-            self.ticketNumber = (last_ticket.ticketNumber + 1) if last_ticket.ticketNumber else 1
-            if self.ticketNumber is None:
+            if not last_ticket:
                 self.ticketNumber = 1
+            else:
+                self.ticketNumber = (last_ticket.ticketNumber + 1) if last_ticket.ticketNumber else 1
+                if self.ticketNumber is None:
+                    self.ticketNumber = 1
         super().save(*args, **kwargs)
 
 

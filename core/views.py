@@ -19,6 +19,7 @@ from .serializers import (UserSerializer, LoginSerializer,
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from datetime import datetime
 
 
 class RegisterView(generics.CreateAPIView):
@@ -475,3 +476,34 @@ class SetTicketsPaidView(APIView):
         serialized_tickets = TicketSerializer(tickets, many=True).data
 
         return Response({"tickets": serialized_tickets}, status=status.HTTP_200_OK)
+    
+class CreateManyTickets(APIView):
+    
+    def post(self, request):
+        client_data = request.data.get('client_data') 
+        raffle_id = request.data.get('raffle_id')
+        quantity = int(request.data.get('quantity'))
+
+        if not client_data:
+            return Response({'error': 'Debe enviarse el client_data'}, status=status.HTTP_400_BAD_REQUEST)
+        if not raffle_id:
+            return Response({'error': 'Debe enviarse el raffle_id'}, status=status.HTTP_400_BAD_REQUEST)
+        if not quantity:
+            return Response({'error': 'Debe enviarse el valor quantity'}, status=status.HTTP_400_BAD_REQUEST)
+        tickets = []
+        for i in range(quantity):
+            try:
+                newTicket = Ticket()
+                newTicket.buyer_name = client_data['name']
+                newTicket.phone_number = client_data['phone_number']
+                newTicket.email = client_data['email']
+                newTicket.sale_date = str(datetime.now())
+                newTicket.raffle = Raffle.objects.filter(id = raffle_id).first()
+                newTicket.save()
+                tickets.append(newTicket)
+            except Exception as e:
+                return Response({'error': e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        serializedTickets = TicketSerializer(tickets, many=True).data
+
+        return Response(serializedTickets, status=status.HTTP_201_CREATED)
