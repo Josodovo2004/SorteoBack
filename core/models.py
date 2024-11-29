@@ -10,6 +10,19 @@ class Raffle(models.Model):
     image = models.CharField(max_length=500, null=True)
     ticket_price = models.FloatField(null=True)
     raffle_date = models.DateTimeField(null=True)
+    raffleNumber = models.CharField(null=True)
+
+    def save(self, *args, **kwargs):
+
+        lastRaffle = Raffle.objects.filter(id = self.id, user__id=self.user.id).first()
+
+        if not lastRaffle or not lastRaffle.raffleNumber:
+            self.raffleNumber = 'RF1'
+        else:
+            lastRaffleNumber = int(lastRaffle.raffleNumber.split('F')[1])
+            self.raffleNumber = f'RF{lastRaffleNumber+1}'
+
+        super().save(*args, **kwargs)
     
 
 class Ticket(models.Model):
@@ -22,18 +35,26 @@ class Ticket(models.Model):
     sale_date = models.DateTimeField(null=True)
     total_paid = models.FloatField(default=0.00)
     ticketNumber = models.IntegerField(null=True, blank=True)
+    codigo = models.CharField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['raffle', 'ticketNumber'], name='unique_ticket_per_raffle')
+        ]
 
     def save(self, *args, **kwargs):
         if not self.ticketNumber:
             # Get the last ticket for the same raffle and increment its ticketNumber
-            last_ticket = Ticket.objects.filter(raffle=self.raffle).order_by('ticketNumber').last()
-            if not last_ticket:
-                self.ticketNumber = 1
-            else:
-                self.ticketNumber = (last_ticket.ticketNumber + 1) if last_ticket.ticketNumber else 1
-                if self.ticketNumber is None:
-                    self.ticketNumber = 1
+            last_ticket = Ticket.objects.filter(raffle=self.raffle).order_by('-ticketNumber').first()
+            self.ticketNumber = 1 if not last_ticket or not last_ticket.ticketNumber else last_ticket.ticketNumber + 1
+        if not self.codigo:
+            self.codigo = self.get_codigo()
         super().save(*args, **kwargs)
+    
+    def get_codigo(self):
+        if hasattr(self.raffle, 'raffleNumber'):
+            return f'{self.raffle.raffleNumber}-{self.ticketNumber}'
+        return f'RAFFLE-{self.raffle.id}-{self.ticketNumber}'
 
 
 class Prize(models.Model):
