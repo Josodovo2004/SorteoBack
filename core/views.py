@@ -504,6 +504,19 @@ class CreateManyTickets(APIView):
             except Exception as e:
                 return Response({'error': e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        serializedTickets = TicketSerializer(tickets, many=True).data
+        response = client_data
+        ticketResponse = []
+        for value in tickets:
+            value : Ticket
+            ticketResponse.append({
+                'id' : value.id,
+                'is_active' : value.is_active,
+                'is_paid': value.is_paid,
+                'sale_date' : value.sale_date,
+                'total_paid' : value.total_paid,
+                'raffle' : value.raffle.id,
+                'ticket_number' : value.ticketNumber
+            })
+        response['tickets'] = ticketResponse
 
-        return Response(serializedTickets, status=status.HTTP_201_CREATED)
+        return Response(response, status=status.HTTP_201_CREATED)

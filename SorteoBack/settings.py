@@ -150,7 +150,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 10,  # Default page size
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -164,6 +164,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',  # For handling file uploads
     ],
 }
+
 
 from datetime import timedelta
 
