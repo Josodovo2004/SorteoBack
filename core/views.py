@@ -520,3 +520,41 @@ class CreateManyTickets(APIView):
         response['tickets'] = ticketResponse
 
         return Response(response, status=status.HTTP_201_CREATED)
+
+class TicketBuyersView(APIView):
+    def get(self, request, raffle_id):
+        try:
+            # Filter tickets by raffle
+            tickets = Ticket.objects.filter(raffle_id=raffle_id)
+            raffle = Raffle.objects.filter(id=raffle_id).first()
+
+            response = RaffleSerializer(raffle).data
+
+            if not tickets.exists():
+                return Response({"detail": "No tickets found for the given raffle."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Group buyers by DNI or phone number
+            buyers = {}
+            for ticket in tickets:
+                # Use DNI as the key if available; otherwise, use phone number
+                key = ticket.dni if ticket.dni else ticket.phone_number
+                if key:
+                    if ticket.dni:
+                        count = Ticket.objects.filter(dni = key).count()
+                    else:
+                        count = Ticket.objects.filter(phone_number = key).count()
+                    if key not in buyers:
+                        buyers[key] = {
+                            "buyer_name": ticket.buyer_name,
+                            "dni": ticket.dni,
+                            "phone_number": ticket.phone_number,
+                            'email': ticket.email,
+                            'numero_tickets': count,
+                        }
+
+            response['clients'] = buyers
+
+            return Response(buyers, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
